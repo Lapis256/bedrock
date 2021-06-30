@@ -1,11 +1,17 @@
 # Provides an python wrapper for the ctypes wrapper for the c wrapper for leveldb.
 
+from os import environ as env
 import ctypes
 import os.path as op
 import sys
 
-if sys.platform != "win32":
-  ldb = ctypes.cdll.LoadLibrary(op.join(op.dirname(op.realpath(__file__)), "libleveldb.so")) # Load DLL
+def load_library(name):
+  return ctypes.cdll.LoadLibrary(op.join(op.dirname(op.realpath(__file__)), name))
+
+if sys.platform != "win32" and env.get("TERMUX_VERSION", None) is not None:
+  ldb = load_library("libleveldb-termux.so")
+elif env.get("TERMUX_VERSION", None) is None:
+  ldb = load_library("libleveldb.so")
 
 # Setup ctypes arguments and return types for all of the leveldb functions.
 # Most of this pulled from Podshot/MCEdit-Unified
